@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+
+<head>
+    <title>資料表異動</title>
+    <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .button-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      margin: 5px;
+      padding: 10px 16px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .tab-btn:hover {
+      background-color: #005fa3;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background-color: #0078D4;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:hover {
+      background-color: #f0f0f0;
+    }
+
+    @media (max-width: 600px) {
+      .tab-btn {
+        display: block;
+        width: 100%;
+        margin: 6px 0;
+      }
+    }
+  </style>
+
+
+</head>
+
+
+<body>
+    <h1>資料表異動</h1>
+    <div>
+        <button class="tab-btn" onclick="loadTable(apiCustomers, container1);">顧客資料</button>
+        <button class="tab-btn" onclick="loadTable(apiOrders, container1)">訂單資料</button>
+        <button class="tab-btn" onclick="loadTable(apiemployees, container1)">員工資料</button>
+        <button class="tab-btn" onclick="loadTable(apiShippers, container1)">貨運商資料</button>
+        <button class="tab-btn" onclick="loadTable(apiclothing, container1)">服飾資料</button>
+    </div>
+    <div>
+        <div class="card" id="tableContainer">請選擇上方資料分類</div>
+    </div>
+
+
+    <script> //url要改
+        //const apiUrl2 = 'http://localhost:8000/api/hello';
+      const apiCustomers = 'http://localhost:8000/api/1/customers';
+      const apiOrders = 'http://localhost:8000/api/1/orders';
+      const apiclothing = 'http://localhost:8000/api/1/clothing';
+      const apiShippers = 'http://localhost:8000/api/1/shippers';
+      const apiemployees = 'http://localhost:8000/api/1/employees';
+      
+
+        const container1 = document.getElementById('tableContainer');
+
+
+        //1. 讀取資料fetch        固定url -> 不固定
+        //2. 產生table html  (jsondata+table混合產生)
+        //3. 顯示table到指定div   固定element -> 不固定
+        async function loadTable(url, todiv) {
+            try {
+                let tablename=''
+                switch(url){
+                    case apiCustomers:
+                        tablename='customers'
+                        break
+                    case apiOrders:
+                        tablename='orders'
+                        break
+                    case apiclothing:
+                        tablename='clothing'
+                        break
+                    case apiShippers:
+                        tablename='shippers'
+                        break
+                    case apiemployees:
+                        tablename='employees'
+                        break
+                }
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`HTTP 錯誤: ${resp.status}`);
+                const data = await resp.json();//[{},{}]
+                if (!Array.isArray(data) || data.length === 0) {
+                    container.textContent = '沒有資料';
+                    return;
+                }
+                // 產生表格
+                let table = '<table><thead><tr>';
+                // 自動產出表頭
+                table += `<th>操作</th>`;
+                const keys = Object.keys(data[0]);
+                keys.forEach(k => {
+                    table += `<th>${k}</th>`;
+                });
+                table += '</tr></thead><tbody>';
+                // 每一列資料
+                data.forEach(row => {//{}
+                    //console.log({ ...row, state: -1 })
+                    const x = JSON.stringify({ ...row, state: -1 , table: tablename })
+                    console.log(x);
+                    table += '<tr>';
+                    table += `<td><button onclick='updaterow(${x})'>刪除</button></td>`;
+                    keys.forEach(k => {
+                        table += `<td>${row[k]}</td>`;
+                    });
+                    table += '</tr>';
+                });
+                table += '</tbody></table>';
+                todiv.innerHTML = table;
+            } catch (err) {
+                todiv.textContent = '載入失敗：' + err.message;
+            }
+        }
+        //loadtable * 2
+        //showtab()
+        function updaterow(returnbody) {
+            console.log(returnbody)
+       
+            fetch('http://localhost:8000/api/2/update', {
+                method: 'POST',
+                mode: 'cors', // ✅ 很關鍵
+                body: JSON.stringify(returnbody),
+            })
+        }
+    </script>
+</body>
+
+
+</html>

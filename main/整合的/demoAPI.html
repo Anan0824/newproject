@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>資料查詢介面</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .button-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      margin: 5px;
+      padding: 10px 16px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .tab-btn:hover {
+      background-color: #005fa3;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background-color: #0078D4;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:hover {
+      background-color: #f0f0f0;
+    }
+
+    @media (max-width: 600px) {
+      .tab-btn {
+        display: block;
+        width: 100%;
+        margin: 6px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>資料查詢</h1>
+
+  <div class="button-group">
+    <button class="tab-btn">顧客資料</button>
+    <button class="tab-btn">訂單資料</button>
+    <button class="tab-btn">員工資料</button>
+    <button class="tab-btn">貨運商資料</button>
+    <button class="tab-btn">服飾資料</button>
+  </div>
+
+  <div class="card" id="tableContainer1">請選擇上方資料分類</div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const buttonGroup = document.querySelector('.button-group');
+      const todiv = document.getElementById('tableContainer1');
+
+      if (!buttonGroup || !todiv) return;
+
+      const urlMap = {
+        '顧客資料': 'http://localhost:8000/api/1/customers',
+        '訂單資料': 'http://localhost:8000/api/1/orders',
+        '員工資料': 'http://localhost:8000/api/1/employees',
+        '貨運商資料': 'http://localhost:8000/api/1/shippers',
+        '服飾資料': 'http://localhost:8000/api/1/clothing'
+      };
+
+      buttonGroup.addEventListener('click', async (e) => {
+        if (!e.target.classList.contains('tab-btn')) return;
+
+        const label = e.target.textContent.trim();
+        const url = urlMap[label];
+        if (!url) return;
+
+        todiv.innerHTML = "資料載入中...";
+        try {
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error(`HTTP 錯誤: ${resp.status}`);
+          const data = await resp.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            todiv.innerHTML = '查無資料';
+            return;
+          }
+
+          let table = '<table><thead><tr>';
+          const keys = Object.keys(data[0]);
+          keys.forEach(k => table += `<th>${k}</th>`);
+          table += '</tr></thead><tbody>';
+
+          data.forEach(row => {
+            table += '<tr>';
+            keys.forEach(k => table += `<td>${row[k]}</td>`);
+            table += '</tr>';
+          });
+
+          table += '</tbody></table>';
+          todiv.innerHTML = table;
+        } catch (err) {
+          todiv.innerHTML = '載入失敗：' + err.message;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

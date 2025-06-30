@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>新增訂單</title>
+
+  <style>
+    label {
+      font-weight: 600;
+      color: #444;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 3px 6px;
+      margin-bottom: 22px;
+      border: 1.2px solid #bbb;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background-color: #fafafa;
+      box-sizing: border-box;
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41.59L6 5.17l4.59-4.58L12 2l-6 6-6-6z' fill='%23667eea'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+    }
+
+    /* 移除 select 背景圖示，僅留在 select */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    textarea {
+      background-image: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="email"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 3px rgba(102, 126, 234, 0.5);
+      outline: none;
+      background-color: #fff;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #5a6cd8, #653a93);
+    }
+  </style>
+</head>
+<body>
+  <h2>新增訂單</h2>
+
+  <label for="pname">服裝名稱：</label>
+  <select id="pname"></select>
+
+  <label for="cname">會員：</label>
+  <select id="cname"></select>
+
+  <label for="ename">員工：</label>
+  <select id="ename"></select>
+
+  <label for="sname">貨運：</label>
+  <select id="sname"></select>
+
+  <label for="num">件數：</label>
+  <input type="text" id="num" />
+
+  <label for="remark">備註：</label>
+  <input type="text" id="remark" />
+
+  <button onclick="insertpost()">送出</button>
+
+  <script>
+    const apiOrders = 'http://localhost:8000/api/1/orders';
+    const apiCustomers = 'http://localhost:8000/api/1/customers';
+    const apiclothing = 'http://localhost:8000/api/1/clothing';
+    const apiShippers = 'http://localhost:8000/api/1/shippers';
+    const apiEmployees = 'http://localhost:8000/api/1/employees';
+
+    const cname = document.getElementById("cname");
+    const pname = document.getElementById("pname");
+    const sname = document.getElementById("sname");
+    const ename = document.getElementById("ename");
+
+    async function cnameAdd() {
+      try {
+        const resp = await fetch(apiCustomers);
+        const data = await resp.json();
+        console.log("客戶資料", data);
+        data.forEach(row => {
+          let op = document.createElement("option");
+          op.value = row["idCustomers"];
+          op.textContent = row["CustomerName"];
+          cname.append(op);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function pnameAdd() {
+      try {
+        const resp = await fetch(apiclothing);
+        const data = await resp.json();
+        data.forEach(row => {
+          let op = document.createElement("option");
+          op.value = row["idClothing"];
+          op.textContent = row["Name"];
+          pname.append(op);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function snameAdd() {
+      try {
+        const resp = await fetch(apiShippers);
+        const data = await resp.json();
+        data.forEach(row => {
+          let op = document.createElement("option");
+          op.value = row["idShippers"];
+          op.textContent = row["shippername"];
+          sname.append(op);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function enameAdd() {
+      try {
+        const resp = await fetch(apiEmployees);
+        const data = await resp.json();
+        data.forEach(row => {
+          let op = document.createElement("option");
+          op.value = row["idEmployees"];
+          op.textContent = row["Employeename"];
+          ename.append(op);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    cnameAdd();
+    pnameAdd();
+    snameAdd();
+    enameAdd();
+
+    function insertpost() {
+      const pname = document.getElementById("pname").value;
+      const num = document.getElementById("num").value.trim();
+      const remark = document.getElementById("remark").value.trim();
+      const cname = document.getElementById("cname").value;
+      const sname = document.getElementById("sname").value;
+      const ename = document.getElementById("ename").value;
+
+      if (pname && num && cname && sname && ename) {
+        const returnbody = JSON.stringify({
+          table: "orders",
+          ClothingID: pname,
+          num: num,
+          CustomersID: cname,
+          ShippersID: sname,
+          EmployeesID: ename,
+          remark: remark
+        });
+
+        fetch('http://localhost:8000/api/2/insert', {
+          method: 'POST',
+          mode: 'cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: returnbody,
+        }).then(res => {
+          if (res.ok) alert("新增成功！");
+          else alert("新增失敗！");
+        }).catch(err => alert("錯誤：" + err.message));
+      } else {
+        alert("請填寫完整資料");
+      }
+    }
+  </script>
+</body>
+</html>

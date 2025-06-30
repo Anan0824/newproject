@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>員工新增表單</title>
+
+  <style>
+  label {
+    font-weight: 600;
+    color: #444;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.95rem;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  textarea {
+    width: 100%;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border: 1.8px solid #bbb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+    box-sizing: border-box;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="email"]:focus,
+  textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 6px rgba(102, 126, 234, 0.6);
+    outline: none;
+    background-color: #fff;
+  }
+
+  button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 1rem;
+  }
+
+  button:hover {
+    background: linear-gradient(135deg, #5a6cd8, #653a93);
+  }
+</style>
+</head>
+<body>
+  <h2>員工新增表單</h2>
+
+  <label>員工名稱：</label><br />
+  <input type="text" id="ename" /><br /><br />
+
+  <label>薪水：</label><br />
+  <input type="text" id="EmployeeSalaries" /><br /><br />
+
+  <label>地址：</label><br />
+  <input type="text" id="address" /><br /><br />
+
+  <label>緊急連絡人：</label><br />
+  <input type="text" id="EmergencyContactName" /><br /><br />
+
+  <label>緊急連絡人電話：</label><br />
+  <input type="text" id="EmergencyContactPhone" /><br /><br />
+
+  <button onclick="insertpost()">新增</button>
+
+  <script>
+    function insertpost() {
+      const ename = document.getElementById("ename").value.trim();
+      const EmployeeSalaries = document.getElementById("EmployeeSalaries").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const EmergencyContactName = document.getElementById("EmergencyContactName").value.trim();
+      const EmergencyContactPhone = document.getElementById("EmergencyContactPhone").value.trim();
+
+      if (!ename) {
+        alert("請輸入員工名稱");
+        return;
+      }
+
+      fetch('http://localhost:8000/api/2/insert', {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          table: "employees",
+          ename,
+          EmployeeSalaries,
+          address,
+          EmergencyContactName,
+          EmergencyContactPhone
+        }),
+      })
+      .then(res => {
+        if (res.ok) alert("新增成功！");
+        else alert("新增失敗！");
+      })
+      .catch(err => alert("錯誤：" + err.message));
+    }
+  </script>
+</body>
+</html>

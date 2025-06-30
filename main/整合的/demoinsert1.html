@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>服裝新增表單</title>
+
+  <style>
+  label {
+    font-weight: 600;
+    color: #444;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.95rem;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  textarea {
+    width: 100%;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border: 1.8px solid #bbb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+    box-sizing: border-box;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="email"]:focus,
+  textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 6px rgba(102, 126, 234, 0.6);
+    outline: none;
+    background-color: #fff;
+  }
+
+  button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 1rem;
+  }
+
+  button:hover {
+    background: linear-gradient(135deg, #5a6cd8, #653a93);
+  }
+</style>
+</head>
+
+<body>
+  <h2>服裝新增表單</h2>
+
+  <label for="pname">服飾名稱：</label><br />
+  <input type="text" id="pname" /><br /><br />
+
+  <label for="style">風格：</label><br />
+  <input type="text" id="style" /><br /><br />
+
+  <label for="price">價格：</label><br />
+  <input type="text" id="price" /><br /><br />
+
+  <label for="color">顏色：</label><br />
+  <input type="text" id="color" /><br /><br />
+
+  <label for="size">尺寸：</label><br />
+  <input type="text" id="size" /><br /><br />
+
+  <label for="isPreorder">預購或現貨：</label><br />
+  <input type="text" id="isPreorder" /><br /><br />
+
+  <button onclick="insertpost()">新增</button>
+
+  <script>
+    function insertpost() {
+      let pname = document.getElementById("pname").value.trim();
+      let style = document.getElementById("style").value.trim();
+      let price = document.getElementById("price").value.trim();
+      let color = document.getElementById("color").value.trim();
+      let size = document.getElementById("size").value.trim();
+      let isPreorder = document.getElementById("isPreorder").value.trim();
+
+      if (pname && price) {
+        fetch('http://localhost:8000/api/2/insert', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            table: "clothing",
+            pname: pname,
+            style: style,
+            color: color,
+            size: size,
+            isPreorder: isPreorder,
+            price: price
+          }),
+        })
+          .then(response => {
+            if (response.ok) {
+              alert("新增成功！");
+              // 清空欄位
+              document.getElementById("pname").value = "";
+              document.getElementById("style").value = "";
+              document.getElementById("price").value = "";
+              document.getElementById("color").value = "";
+              document.getElementById("size").value = "";
+              document.getElementById("isPreorder").value = "";
+            } else {
+              alert("新增失敗，請稍後再試");
+            }
+          })
+          .catch(err => {
+            alert("網路錯誤：" + err);
+          });
+      } else {
+        alert("請輸入服飾名稱和價格");
+      }
+    }
+  </script>
+</body>
+
+</html>
