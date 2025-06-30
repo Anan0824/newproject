@@ -55,53 +55,54 @@
         });
 
         function draw() {
-            // 如果尚未開始移動，先不要畫圖（避免一開始就撞到自己）
-            if (!direction) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 畫蛇身
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i === 0 ? "green" : "lightgreen";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    }
 
-            for (let i = 0; i < snake.length; i++) {
-                ctx.fillStyle = i === 0 ? "green" : "lightgreen";
-                ctx.fillRect(snake[i].x, snake[i].y, box, box);
-            }
+    // 畫食物
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
 
-            ctx.fillStyle = "red";
-            ctx.fillRect(food.x, food.y, box, box);
+    if (direction) {
+        let snakeX = snake[0].x;
+        let snakeY = snake[0].y;
 
-            let snakeX = snake[0].x;
-            let snakeY = snake[0].y;
+        if (direction === "LEFT") snakeX -= box;
+        if (direction === "UP") snakeY -= box;
+        if (direction === "RIGHT") snakeX += box;
+        if (direction === "DOWN") snakeY += box;
 
-            if (direction === "LEFT") snakeX -= box;
-            if (direction === "UP") snakeY -= box;
-            if (direction === "RIGHT") snakeX += box;
-            if (direction === "DOWN") snakeY += box;
-
-            // 撞牆或撞到自己就結束
-            if (
-                snakeX < 0 || snakeX >= canvas.width ||
-                snakeY < 0 || snakeY >= canvas.height ||
-                collision(snakeX, snakeY, snake)
-            ) {
-                clearInterval(game);
-                alert("遊戲結束！你的得分是：" + score);
-                return;
-            }
-
-            let newHead = { x: snakeX, y: snakeY };
-
-            if (snakeX === food.x && snakeY === food.y) {
-                score++;
-                document.getElementById("score").textContent = "得分：" + score;
-                food = {
-                    x: Math.floor(Math.random() * 19 + 1) * box,
-                    y: Math.floor(Math.random() * 19 + 1) * box
-                };
-            } else {
-                snake.pop();
-            }
-
-            snake.unshift(newHead);
+        // 撞牆或撞到自己結束遊戲
+        if (
+            snakeX < 0 || snakeX >= canvas.width ||
+            snakeY < 0 || snakeY >= canvas.height ||
+            collision(snakeX, snakeY, snake)
+        ) {
+            clearInterval(game);
+            alert("遊戲結束！你的得分是：" + score);
+            return;
         }
+
+        let newHead = { x: snakeX, y: snakeY };
+
+        if (snakeX === food.x && snakeY === food.y) {
+            score++;
+            document.getElementById("score").textContent = "得分：" + score;
+            food = {
+                x: Math.floor(Math.random() * 19 + 1) * box,
+                y: Math.floor(Math.random() * 19 + 1) * box
+            };
+        } else {
+            snake.pop();
+        }
+
+        snake.unshift(newHead);
+    }
+}
 
         function collision(x, y, array) {
             for (let i = 0; i < array.length; i++) {
@@ -116,3 +117,4 @@
     </script>
 </body>
 </html>
+
