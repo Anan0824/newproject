@@ -116,11 +116,9 @@
 
     // 隨機推薦影片
     const videoLinks = [
-        { title: '影片 1', url: 'https://www.youtube.com/watch?v=o9DhvbqYzns' },
+        { title: '影片 1', url: 'https://www.youtube.com/watch?v=0_g-kfiAg9g' },
         { title: '影片 2', url: 'https://www.youtube.com/watch?v=nFQKvjM9HCw' },
-        { title: '影片 3', url: 'https://www.youtube.com/watch?v=5XyR2IFjk3s' },
-        { title: '影片 4', url: 'https://www.youtube.com/watch?v=3RZn9M09uyk' },
-        { title: '影片 5', url: 'https://www.youtube.com/watch?v=J2y9EvcPZZM' }
+        
     ];
 
     // 隨機排序影片
@@ -143,15 +141,39 @@
 
     // 根據影片ID改變iframe影片
     function changeVideo(index) {
-        const videoFrame = document.getElementById('video-frame');
-        videoFrame.src = `https://www.youtube.com/embed/${videoLinks[index].url.split('v=')[1]}`;
+    const videoLink = videoLinks[index];
+    if (!videoLink) {
+        alert("找不到影片資料！");
+        return;
     }
 
-    // 初始化隨機影片
-    shuffleVideos();
+    const videoUrl = videoLink.url;
+    console.log("解析的 URL =", videoUrl);
 
-    // 初始化影片為第一個隨機選擇的影片
+    try {
+        // 如果 videoUrl 是完整網址，就直接 new URL
+        // 如果不是完整網址，也能正確解析
+        const urlObj = new URL(videoUrl, "https://www.youtube.com");
+        const videoId = urlObj.searchParams.get("v");
+
+        if (videoId) {
+            const videoFrame = document.getElementById('video-frame');
+            videoFrame.src = `https://www.youtube.com/embed/${videoId}`;
+        } else {
+            alert("影片網址解析失敗！");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("影片網址有誤！");
+    }
+}
+
+
+
+    window.addEventListener("DOMContentLoaded", () => {
+    shuffleVideos();
     changeVideo(0);
+});
 
 </script>
 
